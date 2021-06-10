@@ -1,18 +1,51 @@
 {
 	"info": {
-		"_postman_id": "99e865ab-345a-458b-adca-3778994b6a89",
+		"_postman_id": "2108c80d-5ed7-4fd1-a2a2-a179ebe32cae",
 		"name": "Todo API",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
 		{
 			"name": "Register User",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"\r",
+							"var ran1=_.random(1,1000);\r",
+							"var ran2=_.random(1,1000);\r",
+							"pm.environment.set(\"email\", \"tes\"+ran1+\"12\"+ran2+\"@test.com\");\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"if(pm.response.code === 201){\r",
+							"    //To get a new created ID\r",
+							"    var NewUserId = pm.response.headers.get(\"Location\");\r",
+							"    var UserId = NewUserId[NewUserId.length - 1];\r",
+							"    pm.environment.set(\"UserId\", UserId);\r",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {}
+			},
 			"request": {
 				"method": "POST",
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{ \n    \"email\": \"test4@test.com\",\n    \"password\": \"test123\"\n}",
+					"raw": "{ \n    \"email\": \"{{email}}\",\n    \"password\": \"test123\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -20,7 +53,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:5000/api/auth/register",
+					"raw": "http://localhost:5000/api/auth/register/",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -29,7 +62,20 @@
 					"path": [
 						"api",
 						"auth",
-						"register"
+						"register",
+						""
+					],
+					"query": [
+						{
+							"key": "email",
+							"value": "Tes52@test.com",
+							"disabled": true
+						},
+						{
+							"key": "password",
+							"value": "test123",
+							"disabled": true
+						}
 					]
 				}
 			},
@@ -41,11 +87,10 @@
 				{
 					"listen": "test",
 					"script": {
-						"id": "20e6d6af-11c0-490a-a50b-5b23b4e9aef7",
 						"exec": [
 							"let response = pm.response.json();",
 							"",
-							"pm.collectionVariables.set('auth-token', response.token);"
+							"pm.globals.set('atoken', response.token);"
 						],
 						"type": "text/javascript"
 					}
@@ -56,12 +101,11 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"email\": \"test1@test.com\",\n    \"password\": \"test123\"\n}",
+					"raw": "{\n    \"email\": \"{{email}}\",\n    \"password\": \"test123\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
-						},
-						"urlencoded": {}
+						}
 					}
 				},
 				"url": {
@@ -81,7 +125,32 @@
 		},
 		{
 			"name": "Get user by id",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"status code is 200\" ,function () {\r",
+							"    pm.response.to.have.status(201);\r",
+							"});\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
 			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{atoken}} ",
+							"type": "string"
+						}
+					]
+				},
 				"method": "GET",
 				"header": [
 					{
@@ -91,7 +160,7 @@
 					}
 				],
 				"url": {
-					"raw": "http://localhost:5000/api/users",
+					"raw": "http://localhost:5000/api/users?id={{UserId}}&email=admin@test.com&password=test123",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -100,6 +169,20 @@
 					"path": [
 						"api",
 						"users"
+					],
+					"query": [
+						{
+							"key": "id",
+							"value": "{{UserId}}"
+						},
+						{
+							"key": "email",
+							"value": "admin@test.com"
+						},
+						{
+							"key": "password",
+							"value": "test123"
+						}
 					]
 				},
 				"description": "Get user by id\n\nMust be admin\nCan only retrieve yourself, i.e., the logged in use"
@@ -108,18 +191,56 @@
 		},
 		{
 			"name": "Create Todo",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var ToDoId;\r",
+							"\r",
+							"var data = JSON.parse(postman.getResponseHeader(\"Location\"));\r",
+							"postman.setEnvironmentVariable(\"ToDoId\", data.href.substring(2))"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"var randomTitle=_.random(1,1000);\r",
+							"var randomTitle=_.random(1,1000);\r",
+							"var randomTitle=_.random(1,1000);\r",
+							"pm.environment.set(\"randon\", \"test\"+randomTitle+\"12\");\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
 			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{atoken}} ",
+							"type": "string"
+						}
+					]
+				},
 				"method": "POST",
 				"header": [
 					{
 						"key": "Authorization",
-						"value": "bearer {{auth-token}}",
+						"value": "",
 						"type": "text"
 					}
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"Title\": \"Test B\",\n    \"Description\": \"Test B\",\n    \"IsComplete\": \"false\"\n}",
+					"raw": "{\n    \"Title\": \"{{randon}}\",\n    \"Description\": \"To Do list for {{randon}}\",\n    \"IsComplete\": \"false\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -143,17 +264,49 @@
 		},
 		{
 			"name": "Get todo by Id",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"status code is 200\" ,function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"\r",
+							"});\r",
+							"//var responsebody = pm.response.json();\r",
+							"\r",
+							"//var Status = responsebody.status\r",
+							"//var Status == 1\r",
+							"//pm.test(\"Reponse body status = 1\", function (){\r",
+							"//pm.expect(responsebody.id).to.eql(\"{{ToDoId}}\")\r",
+							"//});////"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
 			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{atoken}} ",
+							"type": "string"
+						}
+					]
+				},
 				"method": "GET",
 				"header": [
 					{
 						"key": "Authorization",
 						"value": "bearer {{auth-token}}",
-						"type": "text"
+						"type": "text",
+						"disabled": true
 					}
 				],
 				"url": {
-					"raw": "http://localhost:5000/api/todos/1",
+					"raw": "http://localhost:5000/api/todos/6?id=28",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -162,7 +315,13 @@
 					"path": [
 						"api",
 						"todos",
-						"1"
+						"6"
+					],
+					"query": [
+						{
+							"key": "id",
+							"value": "28"
+						}
 					]
 				}
 			},
@@ -171,12 +330,23 @@
 		{
 			"name": "Get all todos (authorized in user)",
 			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{atoken}} ",
+							"type": "string"
+						}
+					]
+				},
 				"method": "GET",
 				"header": [
 					{
 						"key": "Authorization",
 						"value": "bearer {{auth-token}}",
-						"type": "text"
+						"type": "text",
+						"disabled": true
 					}
 				],
 				"url": {
@@ -300,7 +470,6 @@
 				{
 					"listen": "test",
 					"script": {
-						"id": "d428ec42-7611-4ad9-bf54-fdd5d6473308",
 						"exec": [
 							"console.log(pm.variables.get('auth-token'));"
 						],
@@ -337,7 +506,6 @@
 		{
 			"listen": "prerequest",
 			"script": {
-				"id": "402af9a3-46c7-45b6-aaa9-cfd26f0013f4",
 				"type": "text/javascript",
 				"exec": [
 					""
@@ -347,7 +515,6 @@
 		{
 			"listen": "test",
 			"script": {
-				"id": "d5852780-4204-420f-9495-7b35d6370bac",
 				"type": "text/javascript",
 				"exec": [
 					""
@@ -357,10 +524,12 @@
 	],
 	"variable": [
 		{
-			"id": "ffb0176d-548a-4765-898d-fc7d71a14658",
 			"key": "auth-token",
 			"value": ""
+		},
+		{
+			"key": "email",
+			"value": ""
 		}
-	],
-	"protocolProfileBehavior": {}
+	]
 }

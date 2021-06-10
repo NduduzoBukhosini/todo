@@ -1,0 +1,45 @@
+
+
+Admin:
+
+Given: Users already created
+when : request to view users is submitted
+and  : has all the admin permisions
+Then : List of users should be returned.
+
+2.Scenario: Assigning user to admin role
+Given: user already exist
+When : user is assigned an admin
+then : the action should fail and user should not be assisgned to am admin role 
+
+3.Scenario : View existing user detail
+Given: Users already created
+when : request to view users is submitted
+and  : user id for the user is provided
+Then : User details should be provided.
+
+User
+1.Scenario: Register/Create User
+Given: User can access the System
+When: User enters correct details to the system
+and : email address not in use 
+Then: User Id is returned to the User.
+
+2.Scenario: Updating Todo
+Given: User already exist 
+When: user create a Todo
+and : Edit the Todo
+Then: the the Existing todo should be updated.
+
+
+3.Scenario: Deleting Todo for user
+Given: Todo already exist for a user
+When: A request to Delete to do i sent
+and :user has access to Delete the todo
+Then: Todo should be deleted.
+
+
+4. Scenario: view a Todo item
+Given: User has todo items
+When: User enters a Todo item Id
+Then: Todo item should be shown
